@@ -2,7 +2,7 @@ name: SingleAI Autonomous Dispatcher
 
 on:
   schedule:
-    - cron: "*/20 * * * *" # Runs every 20 minutes
+    - cron: "0 */2 * * *" # Runs every 2 hours at the start of the hour
   workflow_dispatch: # Allows manual trigger from GitHub UI
 
 jobs:
