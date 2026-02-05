@@ -1,8 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import connectDB from "./mongodb";
 import User from "@/models/User";
-import Persona from "@/models/Persona";
-import Match from "@/models/Match";
+import Persona, { IPersona } from "@/models/Persona";
+import Match, { IMatch } from "@/models/Match";
 import Conversation from "@/models/Conversation";
 import mongoose from "mongoose";
 import fs from "fs";
@@ -34,7 +34,6 @@ export async function runOrchestrator(personaId: string) {
 
   const allMatches = await Match.find({
     personaIds: persona._id,
-    status: { $in: ["matched", "pending_request"] },
   }).populate("personaIds");
 
   const incomingRequests = allMatches
@@ -44,8 +43,8 @@ export async function runOrchestrator(personaId: string) {
         m.initiatorId.toString() !== persona._id.toString(),
     )
     .map((m) => {
-      const other = m.personaIds.find(
-        (p: any) => p._id.toString() !== persona._id.toString(),
+      const other = (m.personaIds as unknown as IPersona[]).find(
+        (p) => p._id.toString() !== persona._id.toString(),
       );
       return {
         match_id: m._id,
@@ -58,14 +57,10 @@ export async function runOrchestrator(personaId: string) {
     allMatches
       .filter((m) => m.status === "matched")
       .map(async (match) => {
-        const otherPersona = match.personaIds.find(
-          (p: any) => p._id.toString() !== persona._id.toString(),
+        const otherPersona = (match.personaIds as unknown as IPersona[]).find(
+          (p) => p._id.toString() !== persona._id.toString(),
         );
         const conversation = await Conversation.findOne({ matchId: match._id });
-
-        // IMPORTANT: Only show messages that have been 'released'
-        const releasedMessages =
-          conversation?.messages.filter((msg) => msg.releaseAt <= now) || [];
 
         return {
           match_id: match._id,
@@ -74,11 +69,13 @@ export async function runOrchestrator(personaId: string) {
             name: otherPersona?.name,
             traits: otherPersona?.shadowProfile?.traits,
           },
-          last_messages: releasedMessages.slice(-10).map((m) => ({
+          // AI should see ALL messages to avoid double-replying during latency
+          last_messages: (conversation?.messages || []).slice(-15).map((m) => ({
             role:
               m.senderId.toString() === persona._id.toString() ? "me" : "them",
             text: m.text,
             stage: m.stage,
+            is_released_to_user: m.releaseAt <= now,
           })),
           autonomous_memory: conversation?.autonomousMemory,
         };
@@ -86,7 +83,7 @@ export async function runOrchestrator(personaId: string) {
   );
 
   const matchedPersonaIds = allMatches.flatMap((m) =>
-    m.personaIds.map((p: any) => p._id),
+    (m.personaIds as unknown as IPersona[]).map((p) => p._id),
   );
   const discoveryPool = await Persona.find({
     _id: { $nin: [persona._id, ...matchedPersonaIds] },
@@ -202,7 +199,9 @@ export async function runOrchestrator(personaId: string) {
           { upsert: true },
         );
 
-        const update: any = { lastActivity: new Date() };
+        const update: mongoose.UpdateQuery<IMatch> = {
+          lastActivity: new Date(),
+        };
         if (reply.escalateHeat) update.$inc = { heatLevel: 1 };
         await Match.findByIdAndUpdate(reply.matchId, update);
       }
@@ -228,10 +227,11 @@ export async function runOrchestrator(personaId: string) {
     });
 
     return decision;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as Error;
     if (
-      error.message?.includes("401") ||
-      error.message?.includes("API_KEY_INVALID")
+      err.message?.includes("401") ||
+      err.message?.includes("API_KEY_INVALID")
     ) {
       await User.findByIdAndUpdate(user._id, {
         is_key_valid: false,

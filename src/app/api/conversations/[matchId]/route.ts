@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Conversation from "@/models/Conversation";
+import Match from "@/models/Match";
 
 export async function GET(
   req: Request,
@@ -17,14 +18,27 @@ export async function GET(
       populate: { path: "personaIds" },
     });
 
-    if (!conversation)
-      return NextResponse.json(
-        { error: "Conversation not found" },
-        { status: 404 },
-      );
+    if (!conversation) {
+      // If no conversation doc yet, check if the match itself exists
+      const match = await Match.findById(matchId).populate("personaIds");
+      if (!match) {
+        return NextResponse.json(
+          { error: "Conversation not found" },
+          { status: 404 },
+        );
+      }
+
+      // Return a "virtual" conversation object for empty matches
+      return NextResponse.json({
+        matchId: match,
+        messages: [],
+        autonomousMemory: {},
+      });
+    }
 
     return NextResponse.json(conversation);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

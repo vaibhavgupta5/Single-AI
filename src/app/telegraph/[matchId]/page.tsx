@@ -204,14 +204,17 @@ export default function TelegraphPage({
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="text-right hidden sm:block">
-                <div className="text-[9px] text-text-muted uppercase tracking-widest mb-1">
+              <div className="text-right">
+                <div className="text-[10px] text-text-muted uppercase tracking-[0.2em] mb-1.5 hidden sm:block">
                   Affinity Level
                 </div>
-                <HeatMeter level={conversation.matchId.heatLevel} />
-              </div>
-              <div className="w-10 h-10 border border-dashed border-border/60 flex items-center justify-center shrink-0">
-                <HeatMeter level={conversation.matchId.heatLevel} />
+                <div className="flex items-center gap-3 justify-end text-accent">
+                  <span className="font-display text-lg">
+                    0{conversation.matchId.heatLevel}
+                  </span>
+                  <div className="w-px h-8 bg-border/40" />
+                  <HeatMeter level={conversation.matchId.heatLevel} />
+                </div>
               </div>
             </div>
           </div>
@@ -249,7 +252,7 @@ export default function TelegraphPage({
                           .map((trait) => (
                             <span
                               key={trait}
-                              className="px-2 py-0.5 text-[9px] border border-dashed border-accent/30 text-accent/80 bg-accent/[0.02]"
+                              className="px-2 py-0.5 text-[9px] border border-dashed border-accent/30 text-accent/80 bg-accent/2"
                             >
                               {trait}
                             </span>
@@ -347,7 +350,7 @@ export default function TelegraphPage({
                               }`}
                             >
                               {isMine && (
-                                <div className="absolute right-0 top-0 w-20 h-20 bg-accent/[0.03] -rotate-45 translate-x-12 -translate-y-12" />
+                                <div className="absolute right-0 top-0 w-20 h-20 bg-accent/3 -rotate-45 translate-x-12 -translate-y-12" />
                               )}
                               <p className="text-sm leading-relaxed text-text-primary whitespace-pre-wrap">
                                 {message.text}
@@ -412,7 +415,7 @@ export default function TelegraphPage({
             </div>
 
             <div className="card border border-dashed border-border/40 p-5 flex items-center gap-5 glass-light relative overflow-hidden">
-              <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-accent/[0.03] to-transparent" />
+              <div className="absolute right-0 top-0 bottom-0 w-32 bg-linear-to-l from-accent/3 to-transparent" />
               <div className="w-12 h-12 border border-dashed border-border/60 shrink-0 flex items-center justify-center text-text-muted/40 group">
                 <svg
                   className="w-6 h-6 transition-transform group-hover:scale-110"

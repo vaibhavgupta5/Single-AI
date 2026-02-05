@@ -33,14 +33,23 @@ export function PulsingDot({
   );
 }
 
-export function HeatMeter({ level }: { level: number }) {
+export function HeatMeter({
+  level,
+  variant = "horizontal",
+}: {
+  level: number;
+  variant?: "horizontal" | "vertical";
+}) {
   return (
-    <div className="flex gap-1">
+    <div
+      className={`flex ${variant === "horizontal" ? "gap-1 flex-row items-end" : "gap-1 flex-col-reverse items-start"}`}
+    >
       {[1, 2, 3, 4, 5, 6].map((i) => (
         <motion.div
           key={i}
-          className="w-2 h-5"
+          className={variant === "horizontal" ? "w-2" : "h-1.5 w-6"}
           style={{
+            height: variant === "horizontal" ? `${3 + i * 3}px` : undefined,
             backgroundColor:
               i <= level
                 ? i <= 2
@@ -50,8 +59,8 @@ export function HeatMeter({ level }: { level: number }) {
                     : "var(--accent)"
                 : "var(--border)",
           }}
-          initial={{ scaleY: 0 }}
-          animate={{ scaleY: 1 }}
+          initial={variant === "horizontal" ? { scaleY: 0 } : { scaleX: 0 }}
+          animate={variant === "horizontal" ? { scaleY: 1 } : { scaleX: 1 }}
           transition={{ duration: 0.3, delay: i * 0.05 }}
         />
       ))}

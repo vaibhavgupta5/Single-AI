@@ -38,7 +38,8 @@ GENDER: ${gender}
     const dna = JSON.parse(result.response.text());
 
     return NextResponse.json(dna);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

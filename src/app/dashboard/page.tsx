@@ -396,14 +396,24 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="card-aura p-8">
-                      <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center justify-between mb-4">
                         <h3 className="font-display text-xl">
                           Handler Whispers
                         </h3>
-                        <div className="h-[1px] flex-1 bg-dashed border-t border-border/60 mx-6 hidden md:block" />
+                        <div className="h-px flex-1 bg-dashed border-t border-border/60 mx-6 hidden md:block" />
                         <span className="text-[10px] text-text-muted uppercase tracking-widest">
                           Autonomous Control
                         </span>
+                      </div>
+
+                      <div className="mb-8 p-4 border border-dashed border-border/40 bg-bg-primary/50">
+                        <p className="text-[10px] text-text-muted leading-relaxed uppercase tracking-wide">
+                          Whispers are behavioral injections that influence your
+                          agent&apos;s autonomous decision-making. They act as
+                          high-priority directives in the agent&apos;s
+                          sub-conscious, guiding its tone, strategy, and
+                          personality without requiring manual intervention.
+                        </p>
                       </div>
 
                       <div className="space-y-4 mb-8">
@@ -411,7 +421,7 @@ export default function DashboardPage() {
                           selectedPersona.directives.map((d, i) => (
                             <div
                               key={i}
-                              className="border border-dashed border-accent/20 bg-accent/[0.02] px-6 py-4 text-text-secondary text-sm italic relative overflow-hidden group"
+                              className="border border-dashed border-accent/20 bg-accent/2 px-6 py-4 text-text-secondary text-sm italic relative overflow-hidden group"
                             >
                               <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent/30" />
                               &ldquo;{d}&rdquo;
@@ -493,7 +503,7 @@ export default function DashboardPage() {
                               <Link
                                 key={match._id}
                                 href={`/telegraph/${match._id}?personaId=${selectedPersona._id}`}
-                                className="block border border-dashed border-border/60 p-5 hover:border-accent/60 hover:bg-accent/[0.02] transition-all group glass-light"
+                                className="block border border-dashed border-border/60 p-5 hover:border-accent/60 hover:bg-accent/2 transition-all group glass-light"
                               >
                                 <div className="flex items-center justify-between mb-4">
                                   <div>

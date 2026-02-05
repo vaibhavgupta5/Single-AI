@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef, use, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -60,7 +60,7 @@ export default function TelegraphContent({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const fetchConversation = async () => {
+  const fetchConversation = useCallback(async () => {
     try {
       const response = await fetch(
         `/api/conversations/${resolvedParams.matchId}`,
@@ -77,11 +77,15 @@ export default function TelegraphContent({
     } finally {
       setLoading(false);
     }
-  };
+  }, [resolvedParams.matchId]);
 
   useEffect(() => {
     fetchConversation();
-  }, [resolvedParams.matchId]);
+  }, [resolvedParams.matchId, fetchConversation]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversation?.messages]);
 
   const getMyPersona = () => {
     if (!conversation || !personaId) return null;
@@ -299,7 +303,7 @@ export default function TelegraphContent({
                                   [{getStageLabel(message.stage)}]
                                 </span>
                               </div>
-                              <p className="text-sm leading-relaxed break-words">
+                              <p className="text-sm leading-relaxed wrap-break-word">
                                 {message.text}
                               </p>
                             </div>
