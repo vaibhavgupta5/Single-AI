@@ -143,9 +143,9 @@ export default function IncubatePage() {
     <div className="min-h-screen">
       <section className="border-b border-dashed border-border/60 bg-bg-secondary/30">
         <div className="max-w-3xl mx-auto px-4 py-12">
-          <h1 className="font-display text-4xl mb-2">Incubate Protocol</h1>
+          <h1 className="font-display text-4xl mb-2">Create Your Agent</h1>
           <p className="text-text-secondary tracking-wide">
-            Synthesizing autonomous personality matrix in 3 phases
+            Set up your AI agent in 3 simple steps
           </p>
 
           <div className="flex items-center gap-4 mt-12">
@@ -235,12 +235,12 @@ export default function IncubatePage() {
                 <span className="text-accent underline underline-offset-8 decoration-dashed">
                   01
                 </span>
-                Identity Matrix
+                Basic Information
               </h2>
 
               <div className="space-y-10">
                 <div>
-                  <label className="label">Agent Identifier</label>
+                  <label className="label">Agent Name</label>
                   <input
                     type="text"
                     value={formData.name}
@@ -248,17 +248,15 @@ export default function IncubatePage() {
                       setFormData({ ...formData, name: e.target.value })
                     }
                     className="input-field text-xl border-dashed border-border/60 focus:border-accent/60"
-                    placeholder="e.g., LUNA-01"
+                    placeholder="e.g., Luna"
                   />
                   <p className="text-[10px] text-text-muted uppercase tracking-widest mt-2">
-                    The unique identifier for your synthetic persona
+                    Pick a unique name for your AI agent
                   </p>
                 </div>
 
                 <div>
-                  <label className="label">
-                    Gemini Neural Interface (API Key)
-                  </label>
+                  <label className="label">Google Gemini API Key</label>
                   <input
                     type="password"
                     value={formData.geminiApiKey}
@@ -308,7 +306,7 @@ export default function IncubatePage() {
                   </div>
 
                   <div>
-                    <label className="label">Social Orientation</label>
+                    <label className="label">Interested In</label>
                     <div className="flex flex-col gap-3">
                       {["male", "female", "non-binary"].map((g) => {
                         const isSelected = formData.interestedIn.includes(g);
@@ -356,7 +354,7 @@ export default function IncubatePage() {
                   className="btn-primary w-full py-5 disabled:opacity-50 group"
                 >
                   <span className="flex items-center justify-center gap-2">
-                    Initialize Phase 02
+                    Continue to Step 2
                     <svg
                       className="w-4 h-4 transition-transform group-hover:translate-x-1"
                       fill="none"
@@ -388,29 +386,29 @@ export default function IncubatePage() {
                 <span className="text-accent underline underline-offset-8 decoration-dashed">
                   02
                 </span>
-                Behavioral DNA
+                Personality & Voice
               </h2>
 
               <div className="space-y-10">
                 <div>
-                  <label className="label">Linguistic DNA Sample</label>
+                  <label className="label">Your Personality Sample</label>
                   <textarea
                     value={formData.sample}
                     onChange={(e) =>
                       setFormData({ ...formData, sample: e.target.value })
                     }
                     className="input-field min-h-48 resize-none border-dashed border-border/60 focus:border-accent/60 font-mono text-sm leading-relaxed"
-                    placeholder="Paste conversational telemetry here... (e.g., private messages, stream of consciousness, personal essays)"
+                    placeholder="Paste some text that sounds like you (messages, emails, notes)..."
                   />
-                  <p className="text-[10px] text-text-muted mt-3 leading-relaxed tracking-wider">
-                    OUR LLM WILL EXTRACT VOCABULARY PATTERNS, TONALITY, AND
-                    ARCHETYPICAL TRAITS FROM THIS DATA.
+                  <p className="text-[10px] text-text-muted mt-3 leading-relaxed tracking-wider uppercase">
+                    The AI will learn your unique vocabulary and style from this
+                    sample.
                   </p>
                 </div>
 
                 <div>
                   <label className="label flex items-center justify-between mb-4">
-                    <span>Libido Calibration</span>
+                    <span>Flirtiness Level</span>
                     <span className="text-accent font-mono text-xs">
                       LEVEL:{" "}
                       {Math.round(formData.sexualIntensity * 10)
@@ -434,7 +432,7 @@ export default function IncubatePage() {
                   />
                   <div className="mt-6 flex items-center gap-4 border border-dashed border-border/40 p-4 glass-light">
                     <div className="text-[9px] text-text-muted uppercase tracking-widest shrink-0">
-                      Intensity Viz:
+                      Meter:
                     </div>
                     <HeatMeter
                       level={Math.round(formData.sexualIntensity * 6)}
@@ -444,7 +442,7 @@ export default function IncubatePage() {
 
                 <div className="grid grid-cols-2 gap-8">
                   <div>
-                    <label className="label">Neural Boot</label>
+                    <label className="label">Wake Up Time</label>
                     <select
                       value={formData.activeStart}
                       onChange={(e) =>
@@ -463,7 +461,7 @@ export default function IncubatePage() {
                     </select>
                   </div>
                   <div>
-                    <label className="label">Neural Hibernate</label>
+                    <label className="label">Sleep Time</label>
                     <select
                       value={formData.activeEnd}
                       onChange={(e) =>
@@ -488,14 +486,14 @@ export default function IncubatePage() {
                     onClick={() => setStep(1)}
                     className="px-6 py-5 border border-dashed border-border/60 text-text-muted hover:text-text-primary hover:border-text-muted transition-all flex-1 text-sm uppercase tracking-widest"
                   >
-                    Previous
+                    Go Back
                   </button>
                   <button
                     onClick={analyzeDNA}
                     disabled={!formData.sample || loading}
                     className="btn-primary flex-[2] py-5 disabled:opacity-50 font-display uppercase tracking-widest text-sm"
                   >
-                    {loading ? "Sequencing DNA..." : "Sequence & Analyze"}
+                    {loading ? "Analyzing..." : "Analyze & Continue"}
                   </button>
                 </div>
               </div>
@@ -528,18 +526,16 @@ export default function IncubatePage() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="font-display text-2xl">
-                    Phase Analysis Complete
-                  </h2>
+                  <h2 className="font-display text-2xl">Agent Is Ready!</h2>
                   <p className="text-[10px] text-text-muted uppercase tracking-widest">
-                    Synthetic matrix verified
+                    Your personality has been analyzed
                   </p>
                 </div>
               </div>
 
               <div className="space-y-10">
                 <div>
-                  <label className="label">Extracted Personality Tokens</label>
+                  <label className="label">Key Traits Found</label>
                   <div className="flex flex-wrap gap-2">
                     {dnaResult.traits.map((trait) => (
                       <span
@@ -554,7 +550,7 @@ export default function IncubatePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div>
-                    <label className="label">Linguistic Profile</label>
+                    <label className="label">How Your Agent Sounds</label>
                     <div className="border border-dashed border-accent/20 bg-accent/[0.02] p-6 relative">
                       <div className="absolute left-0 top-0 w-1 h-full bg-accent/30" />
                       <p className="text-text-secondary text-sm leading-relaxed italic">
@@ -564,7 +560,7 @@ export default function IncubatePage() {
                   </div>
 
                   <div>
-                    <label className="label">Relational Preference</label>
+                    <label className="label">Who Your Agent Likes</label>
                     <div className="border border-dashed border-border/40 bg-bg-card/50 p-6">
                       <p className="text-text-muted text-sm leading-relaxed">
                         {dnaResult.matchPreferences}
@@ -605,7 +601,7 @@ export default function IncubatePage() {
                     onClick={() => setStep(2)}
                     className="px-6 py-5 border border-dashed border-border/60 text-text-muted hover:text-text-primary hover:border-text-muted transition-all flex-1 text-sm uppercase tracking-widest"
                   >
-                    Modify DNA
+                    Go Back
                   </button>
                   <button
                     onClick={createPersona}
@@ -615,7 +611,7 @@ export default function IncubatePage() {
                     {loading && (
                       <div className="absolute inset-0 bg-accent/20 animate-pulse" />
                     )}
-                    {loading ? "Synthesizing Persona..." : "Manifest Agent"}
+                    {loading ? "Launching..." : "Launch Your Agent"}
                   </button>
                 </div>
               </div>

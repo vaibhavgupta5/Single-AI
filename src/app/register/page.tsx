@@ -61,9 +61,9 @@ export default function RegisterPage() {
             </div>
             SingleAI
           </Link>
-          <h1 className="font-display text-4xl mt-10 mb-2">Join Neural Pool</h1>
+          <h1 className="font-display text-4xl mt-10 mb-2">Create Account</h1>
           <p className="text-[10px] text-text-muted uppercase tracking-[0.2em]">
-            Establish connection to the autonomous network
+            Start your journey with autonomous AI dating
           </p>
         </div>
 
@@ -75,13 +75,13 @@ export default function RegisterPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="p-4 border border-dashed border-accent/40 bg-accent/5 text-accent text-xs italic"
               >
-                INITIALIZATION FAILED: {error}
+                REGISTRATION FAILED: {error}
               </motion.div>
             )}
 
             <div>
               <label className="label text-[10px] uppercase tracking-widest text-text-muted">
-                Broadcast ID (Email)
+                Email Address
               </label>
               <input
                 type="email"
@@ -96,7 +96,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-1 gap-7">
               <div>
                 <label className="label text-[10px] uppercase tracking-widest text-text-muted">
-                  Master Key (Password)
+                  Password
                 </label>
                 <input
                   type="password"
@@ -110,7 +110,7 @@ export default function RegisterPage() {
 
               <div>
                 <label className="label text-[10px] uppercase tracking-widest text-text-muted">
-                  Verify Key
+                  Confirm Password
                 </label>
                 <input
                   type="password"
@@ -129,7 +129,7 @@ export default function RegisterPage() {
               className="btn-primary w-full py-5 disabled:opacity-50 group font-display uppercase tracking-[0.2em] text-xs mt-4"
             >
               <span className="flex items-center justify-center gap-2">
-                {loading ? "Establishing..." : "Establish Protocol"}
+                {loading ? "Creating account..." : "Create Account"}
                 {!loading && (
                   <svg
                     className="w-4 h-4 transition-transform group-hover:translate-x-1"
@@ -158,12 +158,12 @@ export default function RegisterPage() {
           </div>
 
           <p className="text-center text-text-secondary text-xs tracking-wide">
-            Already verified?{" "}
+            Already have an account?{" "}
             <Link
               href="/login"
               className="text-accent hover:underline uppercase tracking-widest ml-1 font-bold"
             >
-              Resume Session &rarr;
+              Sign In &rarr;
             </Link>
           </p>
         </div>

@@ -50,9 +50,9 @@ export default function LoginPage() {
             </div>
             SingleAI
           </Link>
-          <h1 className="font-display text-4xl mt-10 mb-2">Access Granted</h1>
+          <h1 className="font-display text-4xl mt-10 mb-2">Welcome Back</h1>
           <p className="text-[10px] text-text-muted uppercase tracking-[0.2em]">
-            Enter credentials to resume neural command
+            Sign in to manage your AI agents
           </p>
         </div>
 
@@ -64,13 +64,13 @@ export default function LoginPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="p-4 border border-dashed border-accent/40 bg-accent/5 text-accent text-xs italic"
               >
-                PROTOCOL ERROR: {error}
+                ERROR: {error}
               </motion.div>
             )}
 
             <div>
               <label className="label text-[10px] uppercase tracking-widest text-text-muted">
-                Command Identity (Email)
+                Email Address
               </label>
               <input
                 type="email"
@@ -84,7 +84,7 @@ export default function LoginPage() {
 
             <div>
               <label className="label text-[10px] uppercase tracking-widest text-text-muted">
-                Secure Key (Password)
+                Password
               </label>
               <input
                 type="password"
@@ -102,7 +102,7 @@ export default function LoginPage() {
               className="btn-primary w-full py-5 disabled:opacity-50 group font-display uppercase tracking-[0.2em] text-xs"
             >
               <span className="flex items-center justify-center gap-2">
-                {loading ? "Decrypting..." : "Initialize Session"}
+                {loading ? "Signing in..." : "Sign In"}
                 {!loading && (
                   <svg
                     className="w-4 h-4 transition-transform group-hover:translate-x-1"
@@ -131,12 +131,12 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-text-secondary text-xs tracking-wide">
-            Awaiting new signal?{" "}
+            New to SingleAI?{" "}
             <Link
               href="/register"
               className="text-accent hover:underline uppercase tracking-widest ml-1 font-bold"
             >
-              Join Pool &rarr;
+              Create Account &rarr;
             </Link>
           </p>
         </div>
