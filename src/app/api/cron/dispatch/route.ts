@@ -25,7 +25,9 @@ export async function POST(req: Request) {
 
     // 3. run cycles in parallel
     const results = await Promise.allSettled(
-      awakePersonas.map((agent) => runOrchestrator(agent._id.toString())),
+      awakePersonas.map((agent) =>
+        runOrchestrator(agent._id.toString(), awakePersonas.length),
+      ),
     );
 
     const summary = results.map((res, index) => ({
@@ -41,8 +43,9 @@ export async function POST(req: Request) {
       processed: awakePersonas.length,
       summary,
     });
-  } catch (error: any) {
-    console.error("Cron Dispatch Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("Cron Dispatch Error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

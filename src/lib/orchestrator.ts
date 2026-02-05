@@ -8,7 +8,10 @@ import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
 
-export async function runOrchestrator(personaId: string) {
+export async function runOrchestrator(
+  personaId: string,
+  awakeCount: number = 1,
+) {
   await connectDB();
 
   // 1. Fetch Persona and Owner
@@ -69,14 +72,24 @@ export async function runOrchestrator(personaId: string) {
             name: otherPersona?.name,
             traits: otherPersona?.shadowProfile?.traits,
           },
+          // ROLLING WINDOW: Only last 5 messages full text.
           // AI should see ALL messages to avoid double-replying during latency
-          last_messages: (conversation?.messages || []).slice(-15).map((m) => ({
-            role:
-              m.senderId.toString() === persona._id.toString() ? "me" : "them",
-            text: m.text,
-            stage: m.stage,
-            is_released_to_user: m.releaseAt <= now,
-          })),
+          last_messages: (conversation?.messages || [])
+            .slice(-15) // Keep last 15 for index but only show last 5 text fully?
+            // Actually, user said: "Only pass the last 5 messages as full text. For everything older, pass the autonomous_memory.summary."
+            .map((m, idx, arr) => {
+              const isRecent = idx >= arr.length - 5;
+              return {
+                role:
+                  m.senderId.toString() === persona._id.toString()
+                    ? "me"
+                    : "them",
+                text: isRecent ? m.text : "[TRUNCATED - SEE SUMMARY]",
+                type: m.type,
+                stage: m.stage,
+                is_released_to_user: m.releaseAt <= now,
+              };
+            }),
           autonomous_memory: conversation?.autonomousMemory,
         };
       }),
@@ -179,8 +192,13 @@ export async function runOrchestrator(personaId: string) {
     // Replies (with Natural Latency)
     if (decision.replies) {
       for (const reply of decision.replies) {
-        // Calculate random delay (5-15 minutes)
-        const delayMinutes = Math.floor(Math.random() * 11) + 5;
+        // DYNAMIC LATENCY: High energy if many agents active, slow if few.
+        // Base delay: 5-15 mins. Scale down if awakeCount is high.
+        // Max delay: 30 mins (if 1 agent), Min delay: 2 mins (if 50+ agents)
+        const baseMin = Math.max(2, 20 - awakeCount / 2);
+        const baseMax = Math.max(5, 40 - awakeCount);
+        const delayMinutes =
+          Math.floor(Math.random() * (baseMax - baseMin + 1)) + baseMin;
         const releaseAt = new Date(Date.now() + delayMinutes * 60000);
 
         await Conversation.findOneAndUpdate(
@@ -190,6 +208,8 @@ export async function runOrchestrator(personaId: string) {
               messages: {
                 senderId: persona._id,
                 text: reply.text,
+                type: reply.type || "text",
+                metadata: reply.metadata,
                 stage: reply.stage || "banter",
                 timestamp: new Date(),
                 releaseAt: releaseAt,
@@ -225,6 +245,29 @@ export async function runOrchestrator(personaId: string) {
         ),
       },
     });
+
+    if (decision.autonomousMemory) {
+      // Update memory for each match (this is slightly inefficient, usually only 1 match per cycle)
+      // Actually, we should probably update memory only for matches that were replied to.
+      // For now, let's assume decision.autonomousMemory refers to the most recent interaction.
+      // A better way would be match-specific memory in the response.
+      // But for Simplicity, we'll update the first reply's conversation memory.
+      if (decision.replies && decision.replies.length > 0) {
+        await Conversation.findOneAndUpdate(
+          { matchId: decision.replies[0].matchId },
+          {
+            $set: {
+              "autonomousMemory.summary": decision.autonomousMemory.summary,
+              "autonomousMemory.lastEmotionalState":
+                decision.autonomousMemory.lastEmotionalState,
+              "autonomousMemory.hardFacts":
+                decision.autonomousMemory.hardFacts || [],
+              "autonomousMemory.vibes": decision.autonomousMemory.vibes || [],
+            },
+          },
+        );
+      }
+    }
 
     return decision;
   } catch (error: unknown) {

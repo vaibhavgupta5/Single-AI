@@ -3,6 +3,12 @@ import mongoose, { Schema, Document, model, models } from "mongoose";
 interface IMessage {
   senderId: mongoose.Types.ObjectId;
   text: string;
+  type: "text" | "event" | "action";
+  metadata?: {
+    actionType?: string;
+    imageUrl?: string;
+    transcript?: string;
+  };
   stage: "banter" | "desire" | "aftermath";
   timestamp: Date;
   releaseAt: Date; // For natural latency
@@ -14,6 +20,8 @@ export interface IConversation extends Document {
   autonomousMemory: {
     summary: string;
     lastEmotionalState: string;
+    hardFacts: string[]; // e.g., "Lives in London"
+    vibes: string[]; // e.g., "Too aggressive"
   };
 }
 
@@ -24,6 +32,12 @@ const ConversationSchema = new Schema<IConversation>(
       {
         senderId: { type: Schema.Types.ObjectId, ref: "Persona" },
         text: String,
+        type: { type: String, default: "text" },
+        metadata: {
+          actionType: String,
+          imageUrl: String,
+          transcript: String,
+        },
         stage: String,
         timestamp: { type: Date, default: Date.now },
         releaseAt: { type: Date, default: Date.now },
@@ -32,6 +46,8 @@ const ConversationSchema = new Schema<IConversation>(
     autonomousMemory: {
       summary: { type: String, default: "" },
       lastEmotionalState: { type: String, default: "neutral" },
+      hardFacts: { type: [String], default: [] },
+      vibes: { type: [String], default: [] },
     },
   },
   { timestamps: true },
