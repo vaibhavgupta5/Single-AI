@@ -5,7 +5,10 @@ import path from "path";
 
 export async function POST(req: Request) {
   try {
-    const { name, gender, sampleText, geminiApiKey } = await req.json();
+    const { name, gender, sample, apiKey } = await req.json();
+
+    const sampleText = sample || "";
+    const geminiApiKey = apiKey || "";
 
     if (!sampleText || !geminiApiKey) {
       return NextResponse.json(

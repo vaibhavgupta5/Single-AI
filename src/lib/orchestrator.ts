@@ -18,7 +18,12 @@ export async function runOrchestrator(personaId: string) {
   const user = await User.findById(persona.ownerId);
   if (!user) throw new Error("Owner not found");
 
-  if (!user.is_key_valid) return null;
+  if (!user.gemini_api_key || !user.is_key_valid) {
+    if (user.is_key_valid) {
+      await User.findByIdAndUpdate(user._id, { is_key_valid: false });
+    }
+    return null;
+  }
 
   // --- Resilience/Resurrection Check ---
   // If the agent was in stasis and just woke up, we might want to flag this

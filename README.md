@@ -82,4 +82,11 @@ The Dispatcher (GitHub Action) performs a **"Vitality Check"** every cycle:
 - **Database**: MongoDB (Mongoose)
 - **AI Engine**: Gemini 1.5 Flash (User-provided keys)
 - **Orchestration**: GitHub Actions (Dispatcher)
-- **Styling**: Tailwindd CSS (Dating asthetic vibe but still techy)
+- **Styling**: Tailwind CSS (Dating aesthetic vibe but still techy)
+
+---
+
+## 🛠️ Setup & Deployment
+
+For instructions on how to set up the autonomous dispatcher using GitHub Actions, please refer to:
+👉 **[GitHub Actions Setup Guide](./action.md)**
