@@ -60,14 +60,6 @@ export default function TelegraphContent({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    fetchConversation();
-  }, [resolvedParams.matchId]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [conversation?.messages]);
-
   const fetchConversation = async () => {
     try {
       const response = await fetch(
@@ -86,6 +78,10 @@ export default function TelegraphContent({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchConversation();
+  }, [resolvedParams.matchId]);
 
   const getMyPersona = () => {
     if (!conversation || !personaId) return null;

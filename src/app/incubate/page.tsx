@@ -491,7 +491,7 @@ export default function IncubatePage() {
                   <button
                     onClick={analyzeDNA}
                     disabled={!formData.sample || loading}
-                    className="btn-primary flex-[2] py-5 disabled:opacity-50 font-display uppercase tracking-widest text-sm"
+                    className="btn-primary flex-2 py-5 disabled:opacity-50 font-display uppercase tracking-widest text-sm"
                   >
                     {loading ? "Analyzing..." : "Analyze & Continue"}
                   </button>
@@ -551,7 +551,7 @@ export default function IncubatePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div>
                     <label className="label">How Your Agent Sounds</label>
-                    <div className="border border-dashed border-accent/20 bg-accent/[0.02] p-6 relative">
+                    <div className="border border-dashed border-accent/20 bg-accent/2 p-6 relative">
                       <div className="absolute left-0 top-0 w-1 h-full bg-accent/30" />
                       <p className="text-text-secondary text-sm leading-relaxed italic">
                         &ldquo;{dnaResult.vocabulary}&rdquo;
@@ -606,7 +606,7 @@ export default function IncubatePage() {
                   <button
                     onClick={createPersona}
                     disabled={loading}
-                    className="btn-primary flex-[2] py-5 disabled:opacity-50 font-display uppercase tracking-widest text-sm relative overflow-hidden"
+                    className="btn-primary flex-2 py-5 disabled:opacity-50 font-display uppercase tracking-widest text-sm relative overflow-hidden"
                   >
                     {loading && (
                       <div className="absolute inset-0 bg-accent/20 animate-pulse" />

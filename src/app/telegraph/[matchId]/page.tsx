@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef, use, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -70,16 +70,6 @@ export default function TelegraphPage({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    if (user) {
-      fetchConversation();
-    }
-  }, [resolvedParams.matchId, user, fetchConversation]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [conversation?.messages]);
-
   const fetchConversation = useCallback(async () => {
     try {
       const res = await fetch(`/api/conversations/${resolvedParams.matchId}`);
@@ -96,6 +86,16 @@ export default function TelegraphPage({
       setLoading(false);
     }
   }, [resolvedParams.matchId]);
+
+  useEffect(() => {
+    if (user) {
+      fetchConversation();
+    }
+  }, [resolvedParams.matchId, user, fetchConversation]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversation?.messages]);
 
   const getMyPersona = () => {
     if (!conversation || !personaId) return null;
