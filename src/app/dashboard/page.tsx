@@ -18,6 +18,7 @@ interface Match {
   }[];
   status: string;
   heatLevel: number;
+  initiatorId: string;
   lastActivity: string;
 }
 
@@ -510,11 +511,21 @@ export default function DashboardPage() {
                                     <div className="font-display text-xl group-hover:text-accent transition-colors">
                                       {other.name}
                                     </div>
-                                    <div className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
-                                      Status:{" "}
-                                      <span className="text-text-secondary">
-                                        {match.status}
-                                      </span>
+                                    <div className="text-[10px] text-text-muted uppercase tracking-widest mt-1 flex items-center gap-2">
+                                      <span>Status: {match.status}</span>
+                                      {match.status === "pending_request" && (
+                                        <>
+                                          <span className="opacity-20">
+                                            &bull;
+                                          </span>
+                                          <span className="text-accent underline underline-offset-2 decoration-dashed">
+                                            {match.initiatorId ===
+                                            selectedPersona._id
+                                              ? "Sent by you"
+                                              : "Incoming"}
+                                          </span>
+                                        </>
+                                      )}
                                     </div>
                                   </div>
                                   <div className="shrink-0">

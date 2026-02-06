@@ -19,6 +19,7 @@ interface Message {
   stage: string;
   timestamp: string;
   releaseAt: string;
+  isHuman?: boolean;
 }
 
 interface Persona {
@@ -65,6 +66,8 @@ export default function TelegraphPage({
 
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [messageText, setMessageText] = useState("");
   const [error, setError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -127,6 +130,48 @@ export default function TelegraphPage({
       hour: "numeric",
       minute: "2-digit",
     });
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!messageText.trim() || sending || !personaId) return;
+
+    setSending(true);
+    try {
+      const res = await fetch(
+        `/api/conversations/${resolvedParams.matchId}/message`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: messageText,
+            personaId: personaId,
+          }),
+        },
+      );
+
+      if (res.ok) {
+        setMessageText("");
+        fetchConversation();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to send message");
+      }
+    } catch (err) {
+      console.error("Transmission error:", err);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const hasSentToday = () => {
+    if (!conversation || !personaId) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return conversation.messages.some(
+      (m) =>
+        m.isHuman && m.senderId === personaId && new Date(m.timestamp) >= today,
+    );
   };
 
   const myPersona = getMyPersona();
@@ -451,6 +496,11 @@ export default function TelegraphPage({
                                     </div>
                                   </div>
                                 )}
+                              {message.isHuman && (
+                                <div className="mb-2 text-[8px] bg-accent/20 text-accent px-1.5 py-0.5 border border-dashed border-accent/30 inline-block uppercase tracking-widest">
+                                  Whisper from Human
+                                </div>
+                              )}
                               <p className="text-sm leading-relaxed text-text-primary whitespace-pre-wrap">
                                 {message.text}
                               </p>
@@ -513,39 +563,62 @@ export default function TelegraphPage({
               )}
             </div>
 
-            <div className="card border border-dashed border-border/40 p-5 flex items-center gap-5 glass-light relative overflow-hidden">
-              <div className="absolute right-0 top-0 bottom-0 w-32 bg-linear-to-l from-accent/3 to-transparent" />
-              <div className="w-12 h-12 border border-dashed border-border/60 shrink-0 flex items-center justify-center text-text-muted/40 group">
-                <svg
-                  className="w-6 h-6 transition-transform group-hover:scale-110"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            {!hasSentToday() ? (
+              <form
+                onSubmit={handleSendMessage}
+                className="card border border-dashed border-accent/40 bg-accent/2 p-1 flex items-center gap-2 glass-light"
+              >
+                <input
+                  type="text"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder="Insert a one-time whisper into the autonomous stream..."
+                  className="flex-1 bg-transparent border-none outline-none px-6 py-4 text-sm font-display tracking-wide placeholder:text-text-muted/40"
+                  disabled={sending}
+                />
+                <button
+                  type="submit"
+                  disabled={!messageText.trim() || sending}
+                  className="bg-accent text-white px-8 h-[52px] font-display text-xs uppercase tracking-widest hover:bg-accent/90 transition-all disabled:opacity-50 disabled:grayscale"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <div className="text-[10px] font-display uppercase tracking-widest mb-1">
-                  Handler Protocol: Passive Observer
+                  {sending ? "Transmitting..." : "Send Whisper"}
+                </button>
+              </form>
+            ) : (
+              <div className="card border border-dashed border-border/40 p-5 flex items-center gap-5 glass-light relative overflow-hidden">
+                <div className="absolute right-0 top-0 bottom-0 w-32 bg-linear-to-l from-accent/3 to-transparent" />
+                <div className="w-12 h-12 border border-dashed border-border/60 shrink-0 flex items-center justify-center text-text-muted/40 group">
+                  <svg
+                    className="w-6 h-6 transition-transform group-hover:scale-110"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
                 </div>
-                <p className="text-text-muted text-[10px] leading-relaxed tracking-wide uppercase">
-                  AUTONOMOUS AGENT ACTIVE. MANUAL INTERVENTION IS RESTRICTED.
-                  USE WHISPERS IN DASHBOARD TO INFLUENCE TRAJECTORY.
-                </p>
+                <div className="flex-1">
+                  <div className="text-[10px] font-display uppercase tracking-widest mb-1">
+                    Daily Protocol Limit Reached
+                  </div>
+                  <p className="text-text-muted text-[10px] leading-relaxed tracking-wide uppercase">
+                    ONE WHISPER PERMITTED PER 24H CYCLE. AGENT RETURNED TO FULL
+                    AUTONOMY.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </main>
         </div>
       </div>

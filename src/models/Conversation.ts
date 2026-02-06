@@ -12,6 +12,7 @@ interface IMessage {
   stage: "banter" | "desire" | "aftermath";
   timestamp: Date;
   releaseAt: Date; // For natural latency
+  isHuman?: boolean; // If sent by the human owner
 }
 
 export interface IConversation extends Document {
@@ -39,6 +40,7 @@ const ConversationSchema = new Schema<IConversation>(
           transcript: String,
         },
         stage: String,
+        isHuman: { type: Boolean, default: false },
         timestamp: { type: Date, default: Date.now },
         releaseAt: { type: Date, default: Date.now },
       },

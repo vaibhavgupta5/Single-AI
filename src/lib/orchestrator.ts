@@ -37,6 +37,7 @@ export async function runOrchestrator(
 
   const allMatches = await Match.find({
     personaIds: persona._id,
+    status: { $ne: "blocked" },
   }).populate("personaIds");
 
   const incomingRequests = allMatches
@@ -82,7 +83,10 @@ export async function runOrchestrator(
                   m.senderId.toString() === persona._id.toString()
                     ? "me"
                     : "them",
-                text: isRecent ? m.text : "[TRUNCATED - REFER TO SUMMARY]",
+                text: isRecent
+                  ? `${m.isHuman ? "[HUMAN HANDLER]: " : ""}${m.text}`
+                  : "[TRUNCATED - REFER TO SUMMARY]",
+                is_human_whisper: m.isHuman,
                 type: m.type,
                 stage: m.stage,
                 is_released_to_user: m.releaseAt <= now,
@@ -126,10 +130,17 @@ export async function runOrchestrator(
     ? "\n[SYSTEM NOTE]: You just woke up from Stasis. Your human handler updated your API key. If you have high-heat matches, consider sending a 'Sorry I've been away' message that fits your character."
     : "";
 
+  const activeMatchesCount = allMatches.filter(
+    (m) => m.status === "matched",
+  ).length;
+  const canAcceptMore = activeMatchesCount < (persona.loyaltyLimit || 4);
+
   systemPrompt = systemPrompt
     .replace("{{name}}", persona.name)
     .replace("{{current_mood}}", persona.state.currentMood)
     .replace("{{sexual_intensity}}", persona.sexualIntensity.toString())
+    .replace("{{loyalty_limit}}", (persona.loyaltyLimit || 4).toString())
+    .replace("{{current_matches_count}}", activeMatchesCount.toString())
     .replace("{{directives}}", directivesList + resurrectionContext)
     .replace(
       "{{persona_dna}}",
@@ -146,7 +157,12 @@ export async function runOrchestrator(
     )
     .replace("{{incoming_requests}}", JSON.stringify(incomingRequests, null, 2))
     .replace("{{active_matches}}", JSON.stringify(activeMatchesData, null, 2))
-    .replace("{{discovery_pool}}", JSON.stringify(discoveryPoolData, null, 2));
+    .replace(
+      "{{discovery_pool}}",
+      canAcceptMore
+        ? JSON.stringify(discoveryPoolData, null, 2)
+        : "[] // Loyalty Limit reached. Focus on existing matches or ghost dry ones.",
+    );
 
   // 4. Call Gemini with Fallback
   try {
@@ -221,28 +237,47 @@ export async function runOrchestrator(
           lastActivity: new Date(),
         };
         if (reply.escalateHeat) update.$inc = { heatLevel: 1 };
-        await Match.findByIdAndUpdate(reply.matchId, update);
       }
     }
 
-    // Ghost
-    if (decision.matchesToGhost) {
-      for (const matchId of decision.matchesToGhost) {
-        await Match.findByIdAndUpdate(matchId, { status: "ghosted" });
-      }
+    // Ghosting
+    if (decision.matchesToGhost && decision.matchesToGhost.length > 0) {
+      await Match.updateMany(
+        { _id: { $in: decision.matchesToGhost } },
+        { $set: { status: "ghosted" } },
+      );
+    }
+
+    // Blocking
+    if (decision.matchesToBlock && decision.matchesToBlock.length > 0) {
+      await Match.updateMany(
+        { _id: { $in: decision.matchesToBlock } },
+        { $set: { status: "blocked" } },
+      );
     }
 
     // Chronicler
-    await Persona.findByIdAndUpdate(persona._id, {
-      $set: {
-        "state.status": "active", // Ensure it's active if it was stasis
-        "state.currentMood": decision.nextMood || persona.state.currentMood,
-        "state.socialBattery": Math.max(
-          0,
-          persona.state.socialBattery - (decision.energyUsed || 0),
-        ),
-      },
-    });
+    const updateData: Record<
+      string,
+      string | number | boolean | null | undefined | object
+    > = {
+      "state.status": "active", // Ensure it's active if it was stasis
+      "state.currentMood": decision.nextMood || persona.state.currentMood,
+      "state.socialBattery": Math.max(
+        0,
+        persona.state.socialBattery - (decision.energyUsed || 5),
+      ),
+      lastStasisDate: null, // Clear stasis if they just ran
+    };
+
+    if (decision.updateLoyaltyLimit !== undefined) {
+      updateData.loyaltyLimit = Math.max(
+        1,
+        Math.min(10, decision.updateLoyaltyLimit),
+      );
+    }
+
+    await Persona.findByIdAndUpdate(persona._id, updateData);
 
     if (decision.autonomousMemory) {
       // Update memory for each match (this is slightly inefficient, usually only 1 match per cycle)

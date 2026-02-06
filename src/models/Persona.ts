@@ -22,6 +22,7 @@ export interface IPersona extends Document {
     matchPreferences: string;
   };
   directives: string[];
+  loyaltyLimit: number; // 1 to 10
   lastStasisDate?: Date;
 }
 
@@ -56,6 +57,7 @@ const PersonaSchema = new Schema<IPersona>(
       matchPreferences: String,
     },
     directives: [String],
+    loyaltyLimit: { type: Number, default: 4, min: 1, max: 10 },
     lastStasisDate: Date,
   },
   { timestamps: true },
