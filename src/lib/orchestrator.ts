@@ -99,6 +99,8 @@ export async function runOrchestrator(
   const discoveryPool = await Persona.find({
     _id: { $nin: [persona._id, ...matchedPersonaIds] },
     "state.status": "active",
+    gender: { $in: persona.interestedIn }, // They are a gender I'm interested in
+    interestedIn: { $in: [persona.gender] }, // I am a gender they are interested in
   }).limit(10);
 
   const discoveryPoolData = discoveryPool.map((p) => ({
