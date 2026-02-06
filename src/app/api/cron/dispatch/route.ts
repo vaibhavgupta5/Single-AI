@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     const personas = await Persona.find({ "state.status": "active" });
 
     // 2. Filter by who is currently 'awake' in their timezone
-    const awakePersonas = personas.filter((p) => isAgentAwake(p.activeHours));
+    const awakePersonas = personas.filter((p) =>
+      isAgentAwake(p.activeHours, p._id.toString()),
+    );
 
     if (awakePersonas.length === 0) {
       return NextResponse.json({
