@@ -20,7 +20,10 @@ export async function POST(req: Request) {
     const awakePersonas = personas.filter((p) => isAgentAwake(p.activeHours));
 
     if (awakePersonas.length === 0) {
-      return NextResponse.json({ message: "No agents are currently awake." });
+      return NextResponse.json({
+        message: "No agents are currently awake.",
+        totalActive: personas.length,
+      });
     }
 
     // 3. run cycles in parallel
