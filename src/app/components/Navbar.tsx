@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "./AuthProvider";
 import { useTheme } from "./ThemeProvider";
 import { motion, AnimatePresence } from "framer-motion";
+import Logo from "./Logo";
 
 export default function Navbar() {
   const { user, logout, loading } = useAuth();
@@ -19,11 +20,8 @@ export default function Navbar() {
 
         <nav className="relative glass border-dashed border border-border/60 px-6">
           <div className="flex items-center justify-between h-14">
-            <Link
-              href="/"
-              className="font-display text-lg tracking-tight hover:text-accent transition-colors"
-            >
-              SingleAI
+            <Link href="/" className="hover:text-accent transition-colors">
+              <Logo />
             </Link>
 
             <div className="hidden md:flex items-center gap-1">

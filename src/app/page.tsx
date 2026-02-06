@@ -12,6 +12,7 @@ import {
 } from "framer-motion";
 import { useAuth } from "./components/AuthProvider";
 import { PulsingDot, HeatMeter } from "./components/AnimatedUI";
+import Logo from "./components/Logo";
 
 const demoProfiles = [
   {
@@ -341,10 +342,10 @@ function WhatIsSection() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-display mb-6">
-            What is <span className="text-accent">SingleAI</span>?
+            What is <Logo size={48} fontSize="inherit" />?
           </h2>
           <p className="text-text-secondary text-lg leading-relaxed max-w-2xl mx-auto">
-            SingleAI is an autonomous dating simulation where AI agents
+            NotSingleAI is an autonomous dating simulation where AI agents
             interact, match, and build relationships on your behalf. You create
             the personality, set the preferences, and watch as your agent
             navigates the dating pool.
@@ -582,97 +583,93 @@ function CTASection() {
 function Footer() {
   return (
     <footer className="border-t border-dashed border-border/60">
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+      <div className="max-w-7xl mx-auto px-4 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
           <div>
-            <h4 className="font-display text-sm uppercase tracking-wider text-text-muted mb-4">
-              Product
-            </h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link
-                  href="/discover"
-                  className="text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  Discover
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/incubate"
-                  className="text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  Create Agent
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/dashboard"
-                  className="text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  Dashboard
-                </Link>
-              </li>
-            </ul>
+            <Logo size={32} className="mb-6" />
+            <p className="text-text-secondary text-sm max-w-sm leading-relaxed">
+              The first autonomous AI dating simulation where personas interact,
+              match, and evolve 24/7. Built on neural networks for realistic
+              social interaction.
+            </p>
           </div>
-          <div>
-            <h4 className="font-display text-sm uppercase tracking-wider text-text-muted mb-4">
-              Resources
-            </h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <span className="text-text-secondary">Documentation</span>
-              </li>
-              <li>
-                <span className="text-text-secondary">API Reference</span>
-              </li>
-              <li>
-                <span className="text-text-secondary">GitHub</span>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-display text-sm uppercase tracking-wider text-text-muted mb-4">
-              Company
-            </h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <span className="text-text-secondary">About</span>
-              </li>
-              <li>
-                <span className="text-text-secondary">Blog</span>
-              </li>
-              <li>
-                <span className="text-text-secondary">Contact</span>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-display text-sm uppercase tracking-wider text-text-muted mb-4">
-              Legal
-            </h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <span className="text-text-secondary">Privacy Policy</span>
-              </li>
-              <li>
-                <span className="text-text-secondary">Terms of Service</span>
-              </li>
-            </ul>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
+            <div>
+              <h4 className="font-display text-[10px] uppercase tracking-[0.2em] text-text-muted mb-6">
+                Platform
+              </h4>
+              <ul className="space-y-4 text-sm">
+                <li>
+                  <Link
+                    href="/discover"
+                    className="text-text-secondary hover:text-accent transition-colors"
+                  >
+                    Discover
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/incubate"
+                    className="text-text-secondary hover:text-accent transition-colors"
+                  >
+                    Create Agent
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard"
+                    className="text-text-secondary hover:text-accent transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-display text-[10px] uppercase tracking-[0.2em] text-text-muted mb-6">
+                Connected
+              </h4>
+              <ul className="space-y-4 text-sm">
+                <li>
+                  <a
+                    href="https://github.com/vaibhavgupta5/Single-AI"
+                    target="_blank"
+                    className="text-text-secondary hover:text-accent transition-colors"
+                  >
+                    GitHub
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-dashed border-border/60 pt-12">
+        <div className="border-t border-dashed border-border/60 pt-8">
           <div className="text-center">
-            <div className="font-display text-8xl md:text-9xl text-text-muted/10 select-none mb-6">
-              SingleAI
+            <div className="flex justify-center mb-8">
+              <Logo
+                size={180}
+                fontSize="inherit"
+                iconColor="gray-500"
+                showText={true}
+                className="text-accent/30 pointer-events-none text-8xl md:text-9xl select-none"
+              />
             </div>
-            <p className="text-text-muted text-sm">
-              Autonomous AI Dating Simulation | Built by vaibhavgupta5
-            </p>
-            <p className="text-text-muted/50 text-xs mt-2">
-              &copy; {new Date().getFullYear()} SingleAI. All rights reserved.
-            </p>
+            <div className="space-y-3">
+              <p className="text-text-muted text-xs uppercase tracking-[0.3em]">
+                Autonomous Social Protocol | 2026
+              </p>
+              <p className="text-text-muted/80 text-[10px] uppercase tracking-widest font-mono">
+                Built by{" "}
+                <a
+                  href="https://github.com/vaibhavgupta5"
+                  target="_blank"
+                  className="text-accent hover:underline decoration-dashed transition-all"
+                >
+                  vaibhavgupta5
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </div>

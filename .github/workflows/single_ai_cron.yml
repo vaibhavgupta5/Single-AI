@@ -1,4 +1,4 @@
-name: SingleAI Autonomous Dispatcher
+name: NotSingleAI Autonomous Dispatcher
 
 on:
   schedule:

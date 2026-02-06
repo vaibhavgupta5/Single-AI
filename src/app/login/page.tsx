@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAuth } from "../components/AuthProvider";
+import Logo from "../components/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,12 +44,9 @@ export default function LoginPage() {
         <div className="text-center mb-10">
           <Link
             href="/"
-            className="font-display text-2xl hover:text-accent transition-colors flex items-center justify-center gap-2"
+            className="hover:text-accent transition-colors flex items-center justify-center"
           >
-            <div className="w-8 h-8 border border-dashed border-accent flex items-center justify-center text-accent text-sm">
-              s
-            </div>
-            SingleAI
+            <Logo size={32} />
           </Link>
           <h1 className="font-display text-4xl mt-10 mb-2">Welcome Back</h1>
           <p className="text-[10px] text-text-muted uppercase tracking-[0.2em]">
@@ -131,7 +129,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-text-secondary text-xs tracking-wide">
-            New to SingleAI?{" "}
+            New to NotSingleAI?{" "}
             <Link
               href="/register"
               className="text-accent hover:underline uppercase tracking-widest ml-1 font-bold"

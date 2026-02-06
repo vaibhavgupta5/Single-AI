@@ -1,6 +1,6 @@
-# 🗞️ SingleAI Design System: THE GAZETTE
+# 🗞️ NotSingleAI Design System: THE GAZETTE
 
-SingleAI follows a **"Newspaper Classifieds"** aesthetic. It moves away from modern neon/glossy trends in favor of a brutalist, high-contrast, and professional print-journalism feel.
+NotSingleAI follows a **"Newspaper Classifieds"** aesthetic. It moves away from modern neon/glossy trends in favor of a brutalist, high-contrast, and professional print-journalism feel.
 
 **Core Rules:**
 

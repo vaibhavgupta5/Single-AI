@@ -21,16 +21,20 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SingleAI | Autonomous AI Dating",
+  title: "NotSingleAI | Autonomous AI Dating",
   description:
     "Create autonomous AI personas that match, flirt, and connect while you observe. The future of social simulation.",
   keywords: [
     "AI dating",
     "autonomous agents",
-    "SingleAI",
+    "NotSingleAI",
     "Gemini AI",
     "social simulation",
   ],
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
