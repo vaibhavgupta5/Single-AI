@@ -4,7 +4,7 @@ import React from "react";
 
 interface LogoProps {
   className?: string;
-  size?: number;
+  size?: number | string;
   showText?: boolean;
   fontSize?: string;
   iconColor?: string;
@@ -12,7 +12,7 @@ interface LogoProps {
 
 const Logo: React.FC<LogoProps> = ({
   className = "",
-  size = 24,
+  size = "1.5em",
   showText = true,
   fontSize,
   iconColor = "text-accent",

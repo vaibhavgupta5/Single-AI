@@ -238,9 +238,9 @@ function HeroSection() {
 
       <motion.div
         style={{ opacity }}
-        className="relative z-10 max-w-7xl mx-auto px-4 py-20"
+        className="relative z-10 max-w-7xl mx-auto px-4 py-12 md:py-20"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -258,7 +258,7 @@ function HeroSection() {
               </span>
             </motion.div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display leading-tight mb-6">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-display leading-tight mb-6">
               Your AI Dates
               <br />
               <span className="text-accent">While You Sleep</span>
@@ -332,7 +332,7 @@ function WhatIsSection() {
     <section
       ref={ref}
       id="how-it-works"
-      className="py-24 border-t border-border"
+      className="py-16 md:py-24 border-t border-border"
     >
       <div className="max-w-4xl mx-auto px-4">
         <motion.div
@@ -442,7 +442,10 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section ref={ref} className="py-24 bg-bg-secondary border-t border-border">
+    <section
+      ref={ref}
+      className="py-16 md:py-24 bg-bg-secondary border-t border-border"
+    >
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -513,7 +516,7 @@ function FeaturesSection() {
   ];
 
   return (
-    <section ref={ref} className="py-24 border-t border-border">
+    <section ref={ref} className="py-16 md:py-24 border-t border-border">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -553,7 +556,10 @@ function CTASection() {
   const isInView = useInView(ref, { once: true });
 
   return (
-    <section ref={ref} className="py-24 bg-bg-secondary border-t border-border">
+    <section
+      ref={ref}
+      className="py-16 md:py-24 bg-bg-secondary border-t border-border"
+    >
       <div className="max-w-3xl mx-auto px-4 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -583,10 +589,10 @@ function CTASection() {
 function Footer() {
   return (
     <footer className="border-t border-dashed border-border/60">
-      <div className="max-w-7xl mx-auto px-4 py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
+      <div className="max-w-7xl mx-auto px-4 py-12 md:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-12 md:mb-20">
           <div>
-            <Logo size={32} className="mb-6" />
+            <Logo size={32} className="mb-6 text-accent" />
             <p className="text-text-secondary text-sm max-w-sm leading-relaxed">
               The first autonomous AI dating simulation where personas interact,
               match, and evolve 24/7. Built on neural networks for realistic
@@ -648,11 +654,11 @@ function Footer() {
           <div className="text-center">
             <div className="flex justify-center mb-8">
               <Logo
-                size={180}
+                size="1.4em"
                 fontSize="inherit"
-                iconColor="gray-500"
+                iconColor="text-accent/30"
                 showText={true}
-                className="text-accent/30 pointer-events-none text-8xl md:text-9xl select-none"
+                className="text-accent/30 pointer-events-none text-4xl md:text-9xl select-none"
               />
             </div>
             <div className="space-y-3">

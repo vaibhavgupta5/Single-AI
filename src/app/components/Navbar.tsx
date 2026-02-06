@@ -14,11 +14,11 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
+    <div className="fixed top-0 left-0 right-0 z-50 px-2 pt-2 md:px-4 md:pt-4">
       <header className="max-w-7xl mx-auto relative">
         <div className="absolute inset-0 bg-accent/5 blur-3xl scale-110 opacity-80" />
 
-        <nav className="relative glass border-dashed border border-border/60 px-6">
+        <nav className="relative glass border-dashed border border-border/60 px-4 md:px-6">
           <div className="flex items-center justify-between h-14">
             <Link href="/" className="hover:text-accent transition-colors">
               <Logo />
@@ -173,7 +173,7 @@ export default function Navbar() {
                 <div className="flex items-center gap-2">
                   <Link
                     href="/login"
-                    className="px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
+                    className="hidden sm:block px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
                   >
                     Sign In
                   </Link>
@@ -215,63 +215,121 @@ export default function Navbar() {
               </button>
             </div>
           </div>
+        </nav>
+      </header>
 
-          <AnimatePresence>
-            {mobileOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="md:hidden border-t border-dashed border-border/60 overflow-hidden"
-              >
-                <div className="py-3 space-y-1">
-                  <Link
-                    href="/discover"
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-2 py-2 text-sm hover:text-accent transition-colors"
+      {/* Mobile Sidebar Portal */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-y-0 right-0 z-[70] w-full max-w-[300px] bg-bg-primary border-l border-dashed border-border/60 shadow-2xl md:hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-dashed border-border/60 flex items-center justify-between">
+                <span className="font-display text-lg">Menu</span>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 -mr-2 text-text-muted hover:text-text-primary transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    Discover
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+                <Link
+                  href="/discover"
+                  onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-3 text-lg font-display hover:bg-bg-secondary/50 rounded-lg hover:text-accent transition-all"
+                >
+                  Discover
+                </Link>
+                <Link
+                  href="/incubate"
+                  onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-3 text-lg font-display hover:bg-bg-secondary/50 rounded-lg hover:text-accent transition-all"
+                >
+                  Create Agent
+                </Link>
+                {user && (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="block px-4 py-3 text-lg font-display hover:bg-bg-secondary/50 rounded-lg hover:text-accent transition-all"
+                  >
+                    Dashboard
                   </Link>
-                  {user && (
+                )}
+                <a
+                  href="https://github.com/vaibhavgupta5/Single-AI"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-3 text-lg font-display hover:bg-bg-secondary/50 rounded-lg hover:text-accent transition-all"
+                >
+                  GitHub
+                </a>
+              </div>
+
+              <div className="p-6 border-t border-dashed border-border/60">
+                {!user ? (
+                  <div className="grid gap-3">
                     <Link
-                      href="/dashboard"
+                      href="/login"
                       onClick={() => setMobileOpen(false)}
-                      className="block px-2 py-2 text-sm hover:text-accent transition-colors"
+                      className="block w-full py-3 text-center border border-dashed border-border/60 rounded-lg hover:border-accent hover:text-accent transition-all"
                     >
-                      Dashboard
+                      Sign In
                     </Link>
-                  )}
-                  <Link
-                    href="/incubate"
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-2 py-2 text-sm hover:text-accent transition-colors"
-                  >
-                    Create Agent
-                  </Link>
-                  <a
-                    href="https://github.com/vaibhavgupta5/Single-AI"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-2 py-2 text-sm hover:text-accent transition-colors"
-                  >
-                    GitHub
-                  </a>
-                  {!user && (
                     <Link
                       href="/register"
                       onClick={() => setMobileOpen(false)}
-                      className="block mt-3 py-2 text-sm text-center bg-accent text-white"
+                      className="block w-full py-3 text-center bg-accent text-white rounded-lg shadow-lg hover:opacity-90 transition-opacity"
                     >
                       Get Started
                     </Link>
-                  )}
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      logout();
+                      setMobileOpen(false);
+                    }}
+                    className="w-full py-3 text-center text-accent border border-dashed border-accent/30 rounded-lg hover:bg-accent/5 transition-all"
+                  >
+                    Sign Out
+                  </button>
+                )}
+                <div className="mt-6 flex justify-center">
+                  <Logo size={24} className="opacity-50 grayscale" />
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </nav>
-      </header>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
