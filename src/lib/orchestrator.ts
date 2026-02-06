@@ -72,11 +72,9 @@ export async function runOrchestrator(
             name: otherPersona?.name,
             traits: otherPersona?.shadowProfile?.traits,
           },
-          // ROLLING WINDOW: Only last 5 messages full text.
-          // AI should see ALL messages to avoid double-replying during latency
+          // Pass all recent messages (up to 20) but only latest 5 as full text to save tokens
           last_messages: (conversation?.messages || [])
-            .slice(-15) // Keep last 15 for index but only show last 5 text fully?
-            // Actually, user said: "Only pass the last 5 messages as full text. For everything older, pass the autonomous_memory.summary."
+            .slice(-20)
             .map((m, idx, arr) => {
               const isRecent = idx >= arr.length - 5;
               return {
@@ -84,7 +82,7 @@ export async function runOrchestrator(
                   m.senderId.toString() === persona._id.toString()
                     ? "me"
                     : "them",
-                text: isRecent ? m.text : "[TRUNCATED - SEE SUMMARY]",
+                text: isRecent ? m.text : "[TRUNCATED - REFER TO SUMMARY]",
                 type: m.type,
                 stage: m.stage,
                 is_released_to_user: m.releaseAt <= now,
