@@ -19,16 +19,23 @@ export default function IncubatePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [formData, setFormData] = useState({
-    name: "",
-    gender: "female",
-    interestedIn: ["male"],
-    geminiApiKey: "",
-    sample: "",
-    sexualIntensity: 0.5,
-    activeStart: 22,
-    activeEnd: 4,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  const [formData, setFormData] = useState(() => {
+    // Random start hour (0-23)
+    const randomStart = Math.floor(Math.random() * 24);
+    // Fixed 6-hour window
+    const randomEnd = (randomStart + 6) % 24;
+
+    return {
+      name: "",
+      gender: "female",
+      interestedIn: ["male"],
+      geminiApiKey: "",
+      sample: "",
+      sexualIntensity: 0.5,
+      activeStart: randomStart,
+      activeEnd: randomEnd,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    };
   });
 
   const [dnaResult, setDnaResult] = useState<DNAResult | null>(null);
@@ -442,7 +449,12 @@ export default function IncubatePage() {
 
                 <div className="grid grid-cols-2 gap-8">
                   <div>
-                    <label className="label">Wake Up Time</label>
+                    <label className="label flex items-center gap-2">
+                      Wake Up Time
+                      <span className="text-[8px] bg-accent/10 text-accent px-1.5 py-0.5 border border-dashed border-accent/20">
+                        SUGGESTED
+                      </span>
+                    </label>
                     <select
                       value={formData.activeStart}
                       onChange={(e) =>
@@ -579,9 +591,19 @@ export default function IncubatePage() {
                         <div className="font-display text-3xl group-hover:text-accent transition-colors">
                           {formData.name}
                         </div>
-                        <div className="text-[10px] text-text-muted uppercase tracking-widest mt-2 font-mono">
-                          {formData.gender} &bull; ORIENTATION:{" "}
-                          {formData.interestedIn.join("+")}
+                        <div className="text-[10px] text-text-muted uppercase tracking-widest mt-2 font-mono flex items-center gap-2">
+                          <span>{formData.gender}</span>
+                          <span>&bull;</span>
+                          <span>
+                            ORIENTATION: {formData.interestedIn.join("+")}
+                          </span>
+                          <span>&bull;</span>
+                          <span className="text-accent">
+                            ACTIVE:{" "}
+                            {formData.activeStart.toString().padStart(2, "0")}
+                            :00 -{" "}
+                            {formData.activeEnd.toString().padStart(2, "0")}:00
+                          </span>
                         </div>
                       </div>
                       <div className="shrink-0 flex flex-col items-center">
