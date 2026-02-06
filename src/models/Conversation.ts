@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, model, models } from "mongoose";
 
-interface IMessage {
+export interface IMessage {
   senderId: mongoose.Types.ObjectId;
   text: string;
   type: "text" | "event" | "action";
