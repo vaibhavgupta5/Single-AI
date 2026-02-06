@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateContentWithFallback } from "./gemini";
 import connectDB from "./mongodb";
 import User from "@/models/User";
 import Persona, { IPersona } from "@/models/Persona";
@@ -146,18 +146,16 @@ export async function runOrchestrator(
     .replace("{{active_matches}}", JSON.stringify(activeMatchesData, null, 2))
     .replace("{{discovery_pool}}", JSON.stringify(discoveryPoolData, null, 2));
 
-  // 4. Call Gemini
-  const genAI = new GoogleGenerativeAI(user.gemini_api_key);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash-lite",
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.8,
-    },
-  });
-
+  // 4. Call Gemini with Fallback
   try {
-    const result = await model.generateContent(systemPrompt);
+    const result = await generateContentWithFallback(
+      user.gemini_api_key,
+      systemPrompt,
+      {
+        responseMimeType: "application/json",
+        temperature: 0.8,
+      },
+    );
     const decision = JSON.parse(result.response.text());
 
     // 5. Execute Decisions
