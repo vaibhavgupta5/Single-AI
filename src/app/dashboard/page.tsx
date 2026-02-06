@@ -43,6 +43,7 @@ interface Persona {
     timezone: string;
   };
   directives: string[];
+  loyaltyLimit: number;
 }
 
 export default function DashboardPage() {
@@ -264,7 +265,7 @@ export default function DashboardPage() {
                     <h3 className="font-display text-[10px] uppercase tracking-[0.2em] text-text-muted mb-5">
                       System Metrics
                     </h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                       <div className="border border-dashed border-border/60 p-4 text-center glass-light">
                         <div className="text-3xl font-display text-accent">
                           {matches.length}
@@ -279,6 +280,14 @@ export default function DashboardPage() {
                         </div>
                         <div className="text-[10px] text-text-muted uppercase tracking-wider mt-2">
                           Battery
+                        </div>
+                      </div>
+                      <div className="border border-dashed border-border/60 p-4 text-center glass-light">
+                        <div className="text-3xl font-display text-accent-secondary">
+                          {selectedPersona.loyaltyLimit || 4}
+                        </div>
+                        <div className="text-[10px] text-text-muted uppercase tracking-wider mt-2">
+                          Loyalty
                         </div>
                       </div>
                     </div>

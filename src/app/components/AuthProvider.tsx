@@ -29,6 +29,7 @@ interface Persona {
   shadowProfile: {
     traits: string[];
   };
+  loyaltyLimit: number;
 }
 
 interface AuthContextType {
