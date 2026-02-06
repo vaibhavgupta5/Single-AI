@@ -15,7 +15,7 @@ export default function Navbar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
       <header className="max-w-7xl mx-auto relative">
-        <div className="absolute inset-0 bg-accent/5 blur-3xl scale-110 opacity-40" />
+        <div className="absolute inset-0 bg-accent/5 blur-3xl scale-110 opacity-80" />
 
         <nav className="relative glass border-dashed border border-border/60 px-6">
           <div className="flex items-center justify-between h-14">
