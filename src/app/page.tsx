@@ -9,6 +9,9 @@ import {
   useInView,
   AnimatePresence,
   PanInfo,
+  useMotionValue,
+  useSpring,
+  useMotionTemplate,
 } from "framer-motion";
 import { useAuth } from "./components/AuthProvider";
 import { PulsingDot, HeatMeter } from "./components/AnimatedUI";
@@ -76,7 +79,7 @@ function SwipeCard({
 
   return (
     <motion.div
-      className="absolute inset-0 glass border border-dashed border-border/60 swipe-card overflow-hidden"
+      className="absolute inset-0 glass  border border-dashed border-border/60 swipe-card overflow-hidden"
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
@@ -225,16 +228,48 @@ function SwipeDemo() {
 
 function HeroSection() {
   const { user } = useAuth();
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springX = useSpring(mouseX, { damping: 50, stiffness: 300 });
+  const springY = useSpring(mouseY, { damping: 50, stiffness: 300 });
+
+  const handleMouseMove = ({
+    clientX,
+    clientY,
+    currentTarget,
+  }: React.MouseEvent) => {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  };
+
+  const spotlightBackground = useMotionTemplate`radial-gradient(600px circle at ${springX}px ${springY}px, rgba(236, 72, 153, 0.15), rgba(139, 92, 246, 0.08), transparent 80%)`;
+
   return (
-    <section ref={ref} className="relative min-h-screen flex items-center">
+    <section
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      className="relative min-h-screen flex items-center overflow-hidden"
+    >
       <div className="absolute inset-0 grid-pattern" />
+
+      {/* Dynamic Mouse Spotlight */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{ background: spotlightBackground }}
+      />
+
+      {/* Static Aura "Lamps" */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/10 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-secondary/10 blur-[120px] rounded-full" />
 
       <motion.div
         style={{ opacity }}
