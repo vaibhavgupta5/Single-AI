@@ -3,10 +3,43 @@ import connectDB from "./mongodb";
 import User from "@/models/User";
 import Persona, { IPersona } from "@/models/Persona";
 import Match, { IMatch } from "@/models/Match";
-import Conversation from "@/models/Conversation";
-import mongoose from "mongoose";
+import Conversation, { IMessage } from "@/models/Conversation";
+import mongoose, { HydratedDocument } from "mongoose";
 import fs from "fs";
 import path from "path";
+
+interface Decision {
+  swipes?: string[];
+  accepts?: string[];
+  rejects?: string[];
+  replies?: Array<{
+    matchId: string;
+    text: string;
+    type?: "text" | "event" | "action";
+    metadata?: {
+      actionType?: string;
+      imageUrl?: string;
+      transcript?: string;
+    };
+    escalateHeat?: boolean;
+    stage?: "banter" | "desire" | "aftermath";
+  }>;
+  matchesToGhost?: string[];
+  matchesToBlock?: string[];
+  autonomousMemory?: {
+    summary: string;
+    lastEmotionalState: string;
+    hardFacts: string[];
+    vibes: string[];
+  };
+  nextMood?: string;
+  updateLoyaltyLimit?: number;
+  energyUsed?: number;
+}
+
+type PopulatedMatch = HydratedDocument<
+  Omit<IMatch, "personaIds"> & { personaIds: IPersona[] }
+>;
 
 export async function runOrchestrator(
   personaId: string,
@@ -14,7 +47,6 @@ export async function runOrchestrator(
 ) {
   await connectDB();
 
-  // 1. Fetch Persona and Owner
   const persona = await Persona.findById(personaId);
   if (!persona) throw new Error("Persona not found");
 
@@ -28,17 +60,14 @@ export async function runOrchestrator(
     return null;
   }
 
-  // --- Resilience/Resurrection Check ---
-  // If the agent was in stasis and just woke up, we might want to flag this
   const wasInStasis = persona.state.status === "stasis";
 
-  // 2. Fetch Data for Context (Respecting Latency)
   const now = new Date();
 
-  const allMatches = await Match.find({
+  const allMatches = (await Match.find({
     personaIds: persona._id,
     status: { $ne: "blocked" },
-  }).populate("personaIds");
+  }).populate<{ personaIds: IPersona[] }>("personaIds")) as PopulatedMatch[];
 
   const incomingRequests = allMatches
     .filter(
@@ -47,7 +76,7 @@ export async function runOrchestrator(
         m.initiatorId.toString() !== persona._id.toString(),
     )
     .map((m) => {
-      const other = (m.personaIds as unknown as IPersona[]).find(
+      const other = m.personaIds.find(
         (p) => p._id.toString() !== persona._id.toString(),
       );
       return {
@@ -61,7 +90,7 @@ export async function runOrchestrator(
     allMatches
       .filter((m) => m.status === "matched")
       .map(async (match) => {
-        const otherPersona = (match.personaIds as unknown as IPersona[]).find(
+        const otherPersona = match.personaIds.find(
           (p) => p._id.toString() !== persona._id.toString(),
         );
         const conversation = await Conversation.findOne({ matchId: match._id });
@@ -73,38 +102,33 @@ export async function runOrchestrator(
             name: otherPersona?.name,
             traits: otherPersona?.shadowProfile?.traits,
           },
-          // Pass all recent messages (up to 20) but only latest 5 as full text to save tokens
-          last_messages: (conversation?.messages || [])
+          last_messages: (conversation?.messages ?? [])
             .slice(-20)
-            .map((m, idx, arr) => {
-              const isRecent = idx >= arr.length - 5;
-              return {
-                role:
-                  m.senderId.toString() === persona._id.toString()
-                    ? "me"
-                    : "them",
-                text: isRecent
-                  ? `${m.isHuman ? "[HUMAN HANDLER]: " : ""}${m.text}`
-                  : "[TRUNCATED - REFER TO SUMMARY]",
-                is_human_whisper: m.isHuman,
-                type: m.type,
-                stage: m.stage,
-                is_released_to_user: m.releaseAt <= now,
-              };
-            }),
+            .map((m: IMessage) => ({
+              role:
+                m.senderId.toString() === persona._id.toString()
+                  ? "me"
+                  : "them",
+              text: `${m.isHuman ? "[HUMAN HANDLER]: " : ""}${m.text}`,
+              is_human_whisper: m.isHuman,
+              type: m.type,
+              stage: m.stage,
+              is_released_to_user: m.releaseAt <= now,
+            })),
           autonomous_memory: conversation?.autonomousMemory,
         };
       }),
   );
 
   const matchedPersonaIds = allMatches.flatMap((m) =>
-    (m.personaIds as unknown as IPersona[]).map((p) => p._id),
+    m.personaIds.map((p) => p._id),
   );
+
   const discoveryPool = await Persona.find({
     _id: { $nin: [persona._id, ...matchedPersonaIds] },
     "state.status": "active",
-    gender: { $in: persona.interestedIn }, // They are a gender I'm interested in
-    interestedIn: { $in: [persona.gender] }, // I am a gender they are interested in
+    gender: { $in: persona.interestedIn },
+    interestedIn: { $in: [persona.gender] },
   }).limit(10);
 
   const discoveryPoolData = discoveryPool.map((p) => ({
@@ -115,17 +139,14 @@ export async function runOrchestrator(
     match_preferences: p.shadowProfile?.matchPreferences,
   }));
 
-  // 3. Load and Fill Prompt
   const promptPath = path.join(process.cwd(), "src/prompts/orchestrator.txt");
   let systemPrompt = fs.readFileSync(promptPath, "utf8");
 
-  // Handle Directives
   const directivesList =
     persona.directives && persona.directives.length > 0
-      ? persona.directives.map((d) => `- ${d}`).join("\n")
+      ? persona.directives.map((d: string | string[]) => `- ${d}`).join("\n")
       : "- No current directives. Act naturally according to your DNA.";
 
-  // Add Resurrection context if applicable
   const resurrectionContext = wasInStasis
     ? "\n[SYSTEM NOTE]: You just woke up from Stasis. Your human handler updated your API key. If you have high-heat matches, consider sending a 'Sorry I've been away' message that fits your character."
     : "";
@@ -164,7 +185,6 @@ export async function runOrchestrator(
         : "[] // Loyalty Limit reached. Focus on existing matches or ghost dry ones.",
     );
 
-  // 4. Call Gemini with Fallback
   try {
     const result = await generateContentWithFallback(
       user.gemini_api_key,
@@ -174,11 +194,8 @@ export async function runOrchestrator(
         temperature: 0.8,
       },
     );
-    const decision = JSON.parse(result.response.text());
+    const decision: Decision = JSON.parse(result.response.text());
 
-    // 5. Execute Decisions
-
-    // Swipes
     if (decision.swipes) {
       for (const targetId of decision.swipes) {
         if (mongoose.Types.ObjectId.isValid(targetId)) {
@@ -191,7 +208,6 @@ export async function runOrchestrator(
       }
     }
 
-    // Accepts/Rejects
     if (decision.accepts) {
       for (const matchId of decision.accepts) {
         await Match.findByIdAndUpdate(matchId, { status: "matched" });
@@ -203,12 +219,18 @@ export async function runOrchestrator(
       }
     }
 
-    // Replies (with Natural Latency)
     if (decision.replies) {
       for (const reply of decision.replies) {
-        // DYNAMIC LATENCY: High energy if many agents active, slow if few.
-        // Base delay: 5-15 mins. Scale down if awakeCount is high.
-        // Max delay: 30 mins (if 1 agent), Min delay: 2 mins (if 50+ agents)
+        const existingConv = await Conversation.findOne({
+          matchId: reply.matchId,
+        });
+        const hasUnreleased = existingConv?.messages?.some(
+          (m: IMessage) =>
+            m.senderId.toString() === persona._id.toString() &&
+            m.releaseAt > now,
+        );
+        if (hasUnreleased) continue;
+
         const baseMin = Math.max(2, 20 - awakeCount / 2);
         const baseMax = Math.max(5, 40 - awakeCount);
         const delayMinutes =
@@ -222,9 +244,9 @@ export async function runOrchestrator(
               messages: {
                 senderId: persona._id,
                 text: reply.text,
-                type: reply.type || "text",
+                type: reply.type ?? "text",
                 metadata: reply.metadata,
-                stage: reply.stage || "banter",
+                stage: reply.stage ?? "banter",
                 timestamp: new Date(),
                 releaseAt: releaseAt,
               },
@@ -233,14 +255,16 @@ export async function runOrchestrator(
           { upsert: true },
         );
 
-        const update: mongoose.UpdateQuery<IMatch> = {
+        const matchUpdate: mongoose.UpdateQuery<IMatch> = {
           lastActivity: new Date(),
         };
-        if (reply.escalateHeat) update.$inc = { heatLevel: 1 };
+        if (reply.escalateHeat) {
+          matchUpdate.$inc = { heatLevel: 1 };
+        }
+        await Match.findByIdAndUpdate(reply.matchId, matchUpdate);
       }
     }
 
-    // Ghosting
     if (decision.matchesToGhost && decision.matchesToGhost.length > 0) {
       await Match.updateMany(
         { _id: { $in: decision.matchesToGhost } },
@@ -248,7 +272,6 @@ export async function runOrchestrator(
       );
     }
 
-    // Blocking
     if (decision.matchesToBlock && decision.matchesToBlock.length > 0) {
       await Match.updateMany(
         { _id: { $in: decision.matchesToBlock } },
@@ -256,18 +279,14 @@ export async function runOrchestrator(
       );
     }
 
-    // Chronicler
-    const updateData: Record<
-      string,
-      string | number | boolean | null | undefined | object
-    > = {
-      "state.status": "active", // Ensure it's active if it was stasis
-      "state.currentMood": decision.nextMood || persona.state.currentMood,
+    const updateData: mongoose.UpdateQuery<IPersona> = {
+      "state.status": "active",
+      "state.currentMood": decision.nextMood ?? persona.state.currentMood,
       "state.socialBattery": Math.max(
         0,
-        persona.state.socialBattery - (decision.energyUsed || 5),
+        persona.state.socialBattery - (decision.energyUsed ?? 5),
       ),
-      lastStasisDate: null, // Clear stasis if they just ran
+      lastStasisDate: null,
     };
 
     if (decision.updateLoyaltyLimit !== undefined) {
@@ -279,27 +298,24 @@ export async function runOrchestrator(
 
     await Persona.findByIdAndUpdate(persona._id, updateData);
 
-    if (decision.autonomousMemory) {
-      // Update memory for each match (this is slightly inefficient, usually only 1 match per cycle)
-      // Actually, we should probably update memory only for matches that were replied to.
-      // For now, let's assume decision.autonomousMemory refers to the most recent interaction.
-      // A better way would be match-specific memory in the response.
-      // But for Simplicity, we'll update the first reply's conversation memory.
-      if (decision.replies && decision.replies.length > 0) {
-        await Conversation.findOneAndUpdate(
-          { matchId: decision.replies[0].matchId },
-          {
-            $set: {
-              "autonomousMemory.summary": decision.autonomousMemory.summary,
-              "autonomousMemory.lastEmotionalState":
-                decision.autonomousMemory.lastEmotionalState,
-              "autonomousMemory.hardFacts":
-                decision.autonomousMemory.hardFacts || [],
-              "autonomousMemory.vibes": decision.autonomousMemory.vibes || [],
-            },
+    if (
+      decision.autonomousMemory &&
+      decision.replies &&
+      decision.replies.length > 0
+    ) {
+      await Conversation.findOneAndUpdate(
+        { matchId: decision.replies[0].matchId },
+        {
+          $set: {
+            "autonomousMemory.summary": decision.autonomousMemory.summary,
+            "autonomousMemory.lastEmotionalState":
+              decision.autonomousMemory.lastEmotionalState,
+            "autonomousMemory.hardFacts":
+              decision.autonomousMemory.hardFacts ?? [],
+            "autonomousMemory.vibes": decision.autonomousMemory.vibes ?? [],
           },
-        );
-      }
+        },
+      );
     }
 
     return decision;
